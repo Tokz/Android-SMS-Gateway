@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "417061725655",
+    "project_id": "textblast-fcc32",
+    "storage_bucket": "textblast-fcc32.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:417061725655:android:d034713aca16727f5ed792",
+        "android_client_info": {
+          "package_name": "com.hinulawanlab.textblaster"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "417061725655-cumh12c3b5int8lma54ktr6b4ncahktq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0R9FQLEjh3fJtaLtDHfw-3R9yXWF0iv4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "417061725655-cumh12c3b5int8lma54ktr6b4ncahktq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

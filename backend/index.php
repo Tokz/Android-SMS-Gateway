@@ -27,7 +27,7 @@ $time = $_REQUEST['time'];
  * Firebase server key at settings
  * https://console.firebase.google.com/
  */
-$firebasekey =  "https://console.firebase.google.com/";
+$firebasekey =  "AIzaSyDog3DYikXCx51xdPgVUoAW-TqdJwCFIjE";
 
 if(isset($_GET['debug']) && count($_REQUEST)>1)
 	file_put_contents("log.txt",json_encode($_REQUEST)."\n\n",FILE_APPEND);
