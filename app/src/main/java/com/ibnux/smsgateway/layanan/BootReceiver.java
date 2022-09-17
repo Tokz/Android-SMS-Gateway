@@ -44,7 +44,7 @@ public class BootReceiver extends BroadcastReceiver {
 
                 if(!scheduledSMS.scheduledDate.isEmpty()) {
                     try {
-                        @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm HH:mm:ss");
+                        @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm hh:mm aa");
                         Date date6=formater.parse(scheduledSMS.scheduledDate);
                         startAlarm(scheduledSMS.id, date6.getTime(), context);
                     } catch (ParseException e) {
@@ -56,6 +56,8 @@ public class BootReceiver extends BroadcastReceiver {
     }
 
     private void startAlarm(Long id, Long scheduled, Context context) {
+
+
         AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent myIntent;
         PendingIntent pendingIntent;

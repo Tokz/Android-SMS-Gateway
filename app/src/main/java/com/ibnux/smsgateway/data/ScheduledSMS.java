@@ -11,4 +11,5 @@ public class ScheduledSMS {
     public String to;
     public String message;
     public String scheduledDate;
+    public String secret;
 }

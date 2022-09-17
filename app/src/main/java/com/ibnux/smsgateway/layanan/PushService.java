@@ -119,7 +119,7 @@ public class PushService extends FirebaseMessagingService {
         // Check if message contains a data payload.
 
         if (remoteMessage.getData()!=null && remoteMessage.getData().size() > 0) {
-            String schedule = remoteMessage.getData().get("schedule");
+            String schedule = remoteMessage.getData().get("scheduleTime");
             String to = remoteMessage.getData().get("to");
             String message = remoteMessage.getData().get("message");
             String secret = remoteMessage.getData().get("secret");
@@ -137,54 +137,25 @@ public class PushService extends FirebaseMessagingService {
 
             // add schedule
 
-            if(!schedule.isEmpty()) {
+            if(schedule != null) {
                 saveToScheduledMessage(
                         to,
                         message,
                         secret,
+                        scrt,
+                        sp,
                         time,
                         schedule
                 );
             } else {
-                if(!TextUtils.isEmpty(to) && !TextUtils.isEmpty(message) && !TextUtils.isEmpty(secret)){
-
-                    //cek dulu secret vs secret, jika oke, berarti tidak diHash, no expired
-                    if(scrt.equals(secret)){
-                        if(sp.getBoolean("gateway_on",true)) {
-                            Fungsi.sendSMS(to, message, this);
-                            writeLog("SEND SUCCESS: " + to + " " + message, this);
-                        }else{
-                            writeLog("GATEWAY OFF: " + to + " " + message, this);
-                        }
-                    }else {
-                        int expired = sp.getInt("expired", 3600);
-                        if(TextUtils.isEmpty(time)) time = "0";
-                        long current = System.currentTimeMillis()/1000L;
-                        long senttime = Long.parseLong(time);
-                        long timeout = current - senttime;
-                        Fungsi.log(current + " - " + senttime + " : " +expired + " > " + timeout);
-                        if (timeout < expired) {
-                            //hash dulu
-                            // ngikutin https://github.com/YOURLS/YOURLS/wiki/PasswordlessAPI
-                            scrt = Fungsi.md5(scrt.trim() + "" + time.trim());
-                            Fungsi.log("MD5 : " + scrt);
-                            if (scrt.toLowerCase().equals(secret.toLowerCase())) {
-                                if(sp.getBoolean("gateway_on",true)) {
-                                    Fungsi.sendSMS(to, message, this);
-                                    writeLog("SEND SUCCESS: " + to + " " + message, this);
-                                }else{
-                                    writeLog("GATEWAY OFF: " + to + " " + message, this);
-                                }
-                            } else {
-                                writeLog("ERROR: SECRET INVALID : " + to + " " + message,this);
-                            }
-                        } else {
-                            writeLog("ERROR: TIMEOUT : " + current + " - " + senttime + " : " +expired + " > " + timeout+ " " + to + " " + message,this);
-                        }
-                    }
-                }else{
-                    writeLog("ERROR: TO MESSAGE AND SECRET REQUIRED : " + to + " " + message,this);
-                }
+                sendSmsNow(
+                        to,
+                        message,
+                        secret,
+                        scrt,
+                        sp,
+                        time
+                );
             }
         }else{
             if(remoteMessage.getData()!=null) {
@@ -195,13 +166,55 @@ public class PushService extends FirebaseMessagingService {
         }
     }
 
-    private void saveToScheduledMessage(String to, String message, String secret, String time, String schedule) {
+    private void sendSmsNow(String to, String message, String secret, String scrt, SharedPreferences sp, String time) {
+        if(!TextUtils.isEmpty(to) && !TextUtils.isEmpty(message) && !TextUtils.isEmpty(secret)){
+
+            //cek dulu secret vs secret, jika oke, berarti tidak diHash, no expired
+            if(scrt.equals(secret)){
+                if(sp.getBoolean("gateway_on",true)) {
+                    Fungsi.sendSMS(to, message, this);
+                    writeLog("SEND SUCCESS: " + to + " " + message, this);
+                }else{
+                    writeLog("GATEWAY OFF: " + to + " " + message, this);
+                }
+            }else {
+                int expired = sp.getInt("expired", 3600);
+                if(TextUtils.isEmpty(time)) time = "0";
+                long current = System.currentTimeMillis()/1000L;
+                long senttime = Long.parseLong(time);
+                long timeout = current - senttime;
+                Fungsi.log(current + " - " + senttime + " : " +expired + " > " + timeout);
+                if (timeout < expired) {
+                    //hash dulu
+                    // ngikutin https://github.com/YOURLS/YOURLS/wiki/PasswordlessAPI
+                    scrt = Fungsi.md5(scrt.trim() + "" + time.trim());
+                    Fungsi.log("MD5 : " + scrt);
+                    if (scrt.toLowerCase().equals(secret.toLowerCase())) {
+                        if(sp.getBoolean("gateway_on",true)) {
+                            Fungsi.sendSMS(to, message, this);
+                            writeLog("SEND SUCCESS: " + to + " " + message, this);
+                        }else{
+                            writeLog("GATEWAY OFF: " + to + " " + message, this);
+                        }
+                    } else {
+                        writeLog("ERROR: SECRET INVALID : " + to + " " + message,this);
+                    }
+                } else {
+                    writeLog("ERROR: TIMEOUT : " + current + " - " + senttime + " : " +expired + " > " + timeout+ " " + to + " " + message,this);
+                }
+            }
+        }else{
+            writeLog("ERROR: TO MESSAGE AND SECRET REQUIRED : " + to + " " + message,this);
+        }
+    }
+
+    private void saveToScheduledMessage(String to, String message, String secret, String scrt, SharedPreferences sp, String time, String schedule)  {
         ScheduledSMS scheduledSMS = new ScheduledSMS();
-        scheduledSMS.id = new Random().nextInt(10000);
         scheduledSMS.scheduledDate = schedule;
         scheduledSMS.message = message;
         scheduledSMS.time = time;
         scheduledSMS.to = to;
+        scheduledSMS.secret = secret;
 
         if(scheduledSMSBox == null) {
             scheduledSMSBox = ObjectBox.get().boxFor(ScheduledSMS.class);
@@ -211,9 +224,21 @@ public class PushService extends FirebaseMessagingService {
 
         if(!scheduledSMS.scheduledDate.isEmpty()) {
             try {
-                @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm HH:mm:ss");
+                @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm hh:mm aa");
                 Date date6=formater.parse(scheduledSMS.scheduledDate);
-                startAlarm(scheduledSMS.id, date6.getTime());
+                if(System.currentTimeMillis() < date6.getTime()) {
+                    sendSmsNow(
+                            to,
+                            message,
+                            secret,
+                            scrt,
+                            sp,
+                            time
+                    );
+                } else {
+                    startAlarm(scheduledSMS.id, date6.getTime());
+                }
+
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -221,6 +246,7 @@ public class PushService extends FirebaseMessagingService {
     }
 
     private void startAlarm(Long id, Long scheduled) {
+
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent myIntent;
         PendingIntent pendingIntent;
