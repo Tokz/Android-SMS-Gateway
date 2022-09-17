@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.WRITE_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
+
     <application
         android:name=".Aplikasi"
         android:allowBackup="true"
@@ -51,6 +52,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver
+            android:name=".layanan.AlarmNotificationReceiver">
+        </receiver>
+
+        <receiver
+            android:name=".layanan.TimeChangedReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_SET"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
