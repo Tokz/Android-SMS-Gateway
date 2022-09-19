@@ -44,7 +44,7 @@ public class BootReceiver extends BroadcastReceiver {
 
                 if(!scheduledSMS.scheduledDate.isEmpty()) {
                     try {
-                        @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm hh:mm aa");
+                        @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm hh:mm:ss aa");
                         Date date6=formater.parse(scheduledSMS.scheduledDate);
                         startAlarm(scheduledSMS.id, date6.getTime(), context);
                     } catch (ParseException e) {

@@ -224,7 +224,7 @@ public class PushService extends FirebaseMessagingService {
 
         if(!scheduledSMS.scheduledDate.isEmpty()) {
             try {
-                @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm hh:mm aa");
+                @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm hh:mm:ss aa");
                 Date date6=formater.parse(scheduledSMS.scheduledDate);
                 if(System.currentTimeMillis() < date6.getTime()) {
                     sendSmsNow(

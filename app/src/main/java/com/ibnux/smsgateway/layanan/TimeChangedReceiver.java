@@ -35,7 +35,7 @@ public class TimeChangedReceiver extends BroadcastReceiver {
             //2022-09-17 20:11:01
             if(!scheduledSMS.scheduledDate.isEmpty()) {
                 try {
-                    @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm hh:mm aa");
+                    @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm hh:mm:ss aa");
                     Date date6=formater.parse(scheduledSMS.scheduledDate);
                     startAlarm(scheduledSMS.id, date6.getTime(), context);
                 } catch (ParseException e) {
