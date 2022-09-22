@@ -32,32 +32,18 @@ public class AlarmNotificationReceiver extends BroadcastReceiver {
             scheduledSMSBox = ObjectBox.get().boxFor(ScheduledSMS.class);
         }
 
-        ScheduledSMS scheduledSMS = scheduledSMSBox.get(smsId);
+        if(scheduledSMSBox.contains(smsId)) {
+            ScheduledSMS scheduledSMS = scheduledSMSBox.get(smsId);
+            SharedPreferences sp = context.getSharedPreferences("pref",0);
+            String scrt =  sp.getString("secret","");
+            Fungsi.log("Local Secret "+scrt+"\n"+
+                    "received Secret "+scheduledSMS.secret+"\n"+
+                    "Time "+scheduledSMS.time+"\n"+
+                    "To "+scheduledSMS.to+"\n"+
+                    "Message "+scheduledSMS.message);
 
-        SharedPreferences sp = context.getSharedPreferences("pref",0);
-        String scrt =  sp.getString("secret","");
-        Fungsi.log("Local Secret "+scrt+"\n"+
-                "received Secret "+scheduledSMS.secret+"\n"+
-                "Time "+scheduledSMS.time+"\n"+
-                "To "+scheduledSMS.to+"\n"+
-                "Message "+scheduledSMS.message);
-
-        sendSmsNow(scheduledSMS.to, scheduledSMS.message,scheduledSMS.secret, scrt, sp, scheduledSMS.time, context);
-
-        scheduledSMSBox.remove(smsId);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-        builder.setAutoCancel(true)
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setWhen(System.currentTimeMillis())
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle("Androidcoding.in")
-                .setContentText("Alarm Testing Task")
-                .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND)
-                .setContentInfo("Info");
-
-        NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1,builder.build());
+            sendSmsNow(scheduledSMS.to, scheduledSMS.message,scheduledSMS.secret, scrt, sp, scheduledSMS.time, context);
+        }
     }
 
     private void sendSmsNow(String to, String message, String secret, String scrt, SharedPreferences sp, String time, Context context) {

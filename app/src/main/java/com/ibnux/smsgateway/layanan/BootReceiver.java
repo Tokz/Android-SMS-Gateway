@@ -18,6 +18,7 @@ import com.ibnux.smsgateway.data.ScheduledSMS;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -44,9 +45,12 @@ public class BootReceiver extends BroadcastReceiver {
 
                 if(!scheduledSMS.scheduledDate.isEmpty()) {
                     try {
-                        @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm hh:mm:ss aa");
+                        @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-mm-dd hh:mm:ss aa");
                         Date date6=formater.parse(scheduledSMS.scheduledDate);
-                        startAlarm(scheduledSMS.id, date6.getTime(), context);
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(date6);
+                        long currentTime = calendar.getTimeInMillis();
+                        startAlarm(scheduledSMS.id, currentTime, context);
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }

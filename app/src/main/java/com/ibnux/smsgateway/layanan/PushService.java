@@ -28,18 +28,23 @@ import com.ibnux.smsgateway.data.LogLine;
 import com.ibnux.smsgateway.data.ScheduledSMS;
 
 import io.objectbox.Box;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
+import java.util.TimeZone;
 
 public class PushService extends FirebaseMessagingService {
     private String TAG = "SMSin";
     private static Box<LogLine> logBox;
 
     private static Box<ScheduledSMS> scheduledSMSBox;
+
+    private CompositeDisposable disposable = new CompositeDisposable();
 
     BroadcastReceiver deliveredReceiver = new BroadcastReceiver(){
         @Override
@@ -220,13 +225,25 @@ public class PushService extends FirebaseMessagingService {
             scheduledSMSBox = ObjectBox.get().boxFor(ScheduledSMS.class);
         }
 
-        scheduledSMSBox.put(scheduledSMS);
+        Log.e("PushService","current id: "+scheduledSMS.id);
+
+        long id = scheduledSMSBox.put(scheduledSMS);
+        Log.e("PushService","saved id: "+id);
+        Log.e("PushService","contains id: "+scheduledSMSBox.contains(id)+" current id:"+ scheduledSMSBox.get(id).scheduledDate);
 
         if(!scheduledSMS.scheduledDate.isEmpty()) {
             try {
-                @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-dd-mm hh:mm:ss aa");
+                @SuppressLint("SimpleDateFormat") SimpleDateFormat formater=new SimpleDateFormat("yyyy-mm-dd hh:mm:ss aa");
                 Date date6=formater.parse(scheduledSMS.scheduledDate);
-                if(System.currentTimeMillis() < date6.getTime()) {
+                Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Singapore"));
+
+                calendar.setTimeInMillis(date6.getTime());
+
+                long currentTime = calendar.getTimeInMillis();
+
+                Calendar now = Calendar.getInstance();
+
+                if(currentTime > now.getTimeInMillis()) {
                     sendSmsNow(
                             to,
                             message,
@@ -236,7 +253,7 @@ public class PushService extends FirebaseMessagingService {
                             time
                     );
                 } else {
-                    startAlarm(scheduledSMS.id, date6.getTime());
+                    startAlarm(id, currentTime);
                 }
 
             } catch (ParseException e) {
@@ -246,7 +263,7 @@ public class PushService extends FirebaseMessagingService {
     }
 
     private void startAlarm(Long id, Long scheduled) {
-
+        Log.e("PUSHSERViCE",""+scheduled);
         AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent myIntent;
         PendingIntent pendingIntent;
@@ -255,7 +272,11 @@ public class PushService extends FirebaseMessagingService {
         myIntent.putExtra("SMS", id);
         pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
 
-        manager.set(AlarmManager.RTC, scheduled, pendingIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            manager.set(AlarmManager.RTC_WAKEUP, 1663806614000L, pendingIntent);
+        } else {
+            manager.set(AlarmManager.RTC_WAKEUP, 1663806614000L, pendingIntent);
+        }
     }
 
     static public void writeLog(String message, Context cx){
