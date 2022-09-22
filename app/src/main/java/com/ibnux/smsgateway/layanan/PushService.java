@@ -273,9 +273,9 @@ public class PushService extends FirebaseMessagingService {
         pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            manager.set(AlarmManager.RTC_WAKEUP, 1663806614000L, pendingIntent);
+            manager.set(AlarmManager.RTC_WAKEUP, scheduled, pendingIntent);
         } else {
-            manager.set(AlarmManager.RTC_WAKEUP, 1663806614000L, pendingIntent);
+            manager.set(AlarmManager.RTC_WAKEUP, scheduled, pendingIntent);
         }
     }
 
