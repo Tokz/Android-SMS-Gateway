@@ -23,6 +23,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.ibnux.smsgateway.data.LogAdapter;
 import com.ibnux.smsgateway.data.LogLine;
 import com.ibnux.smsgateway.data.PaginationListener;
+import com.ibnux.smsgateway.data.ScheduledSMS;
 import com.ibnux.smsgateway.layanan.BackgroundService;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -258,6 +259,20 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 ObjectBox.get().boxFor(LogLine.class).removeAll();
                                 adapter.reload();
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, null)
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+                return true;
+
+            case R.id.menu_clear_sms:
+                new AlertDialog.Builder(this)
+                        .setTitle("Clear Scheduled SMS")
+                        .setMessage("Are you sure?")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                ObjectBox.get().boxFor(ScheduledSMS.class).removeAll();
                             }
                         })
                         .setNegativeButton(android.R.string.no, null)
