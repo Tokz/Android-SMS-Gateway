@@ -22,7 +22,8 @@
         <receiver
             android:name=".layanan.BootReceiver"
             android:label="Push Receiver"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -32,19 +33,22 @@
             android:name=".layanan.BackgroundService"
             android:enabled="true"
             android:exported="true" />
-        <service android:name=".layanan.PushService">
+        <service android:name=".layanan.PushService"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <receiver android:name=".layanan.SmsListener" >
+        <receiver android:name=".layanan.SmsListener"
+            android:exported="true">
             <intent-filter android:priority="1000" >
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
 
         <activity android:name=".MainActivity"
-            android:launchMode="singleInstance">
+            android:launchMode="singleInstance"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
@@ -58,7 +62,8 @@
         </receiver>
 
         <receiver
-            android:name=".layanan.TimeChangedReceiver">
+            android:name=".layanan.TimeChangedReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.TIME_SET"/>
             </intent-filter>
