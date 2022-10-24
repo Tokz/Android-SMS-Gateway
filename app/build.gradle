@@ -8,7 +8,7 @@ android {
     defaultConfig {
         //change applicationId if you want to use your own Firebase
         applicationId "com.hinulawanlab.textblaster"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 33
         versionCode 4
         versionName "2.1"
@@ -31,12 +31,12 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.firebase:firebase-messaging:19.0.1'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'com.google.firebase:firebase-messaging:23.1.0'
     implementation 'com.karumi:dexter:6.1.0'
-    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.11'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }
