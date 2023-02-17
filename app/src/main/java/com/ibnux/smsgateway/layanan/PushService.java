@@ -12,6 +12,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.*;
 import android.os.Build;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.telephony.SmsManager;
 import android.text.TextUtils;
@@ -39,6 +40,7 @@ import java.util.Random;
 import java.util.TimeZone;
 
 public class PushService extends FirebaseMessagingService {
+    private static final long DISPLAY_TIME = 2000;
     private String TAG = "SMSin";
     private static Box<LogLine> logBox;
 
@@ -114,14 +116,12 @@ public class PushService extends FirebaseMessagingService {
     public void onDestroy() {
         unregisterReceiver(sentReceiver);
         unregisterReceiver(deliveredReceiver);
+        super.onDestroy();
     }
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Fungsi.log(TAG, "From: " + remoteMessage.getFrom());
-
-
-        // Check if message contains a data payload.
 
         if (remoteMessage.getData()!=null && remoteMessage.getData().size() > 0) {
             String schedule = remoteMessage.getData().get("scheduleTime");
@@ -140,27 +140,54 @@ public class PushService extends FirebaseMessagingService {
                     "To "+to+"\n"+
                     "Message "+message);
 
-            // add schedule
+            if(to.contains(",")) {
+                String[] recipients = to.split(",");
 
-            if(schedule != null) {
-                saveToScheduledMessage(
-                        to,
-                        message,
-                        secret,
-                        scrt,
-                        sp,
-                        time,
-                        schedule
-                );
+                for(String recipient: recipients)  {
+//                    if(schedule != null) {
+//                        saveToScheduledMessage(
+//                                recipient,
+//                                message,
+//                                secret,
+//                                scrt,
+//                                sp,
+//                                time,
+//                                schedule
+//                        );
+//                    } else {
+                        sendSmsNow(
+                                recipient,
+                                message,
+                                secret,
+                                scrt,
+                                sp,
+                                time
+                        );
+//                    }
+                }
+
             } else {
-                sendSmsNow(
-                        to,
-                        message,
-                        secret,
-                        scrt,
-                        sp,
-                        time
-                );
+                // add schedule
+                if(schedule != null) {
+                    saveToScheduledMessage(
+                            to,
+                            message,
+                            secret,
+                            scrt,
+                            sp,
+                            time,
+                            schedule
+                    );
+                } else {
+                    sendSmsNow(
+                            to,
+                            message,
+                            secret,
+                            scrt,
+                            sp,
+                            time
+                    );
+                }
             }
         }else{
             if(remoteMessage.getData()!=null) {
@@ -170,6 +197,8 @@ public class PushService extends FirebaseMessagingService {
             }
         }
     }
+
+
 
     private void sendSmsNow(String to, String message, String secret, String scrt, SharedPreferences sp, String time) {
         if(!TextUtils.isEmpty(to) && !TextUtils.isEmpty(message) && !TextUtils.isEmpty(secret)){
@@ -211,6 +240,28 @@ public class PushService extends FirebaseMessagingService {
         }else{
             writeLog("ERROR: TO MESSAGE AND SECRET REQUIRED : " + to + " " + message,this);
         }
+    }
+
+    public boolean saveSmsOnDB(String to, String message, String secret, String scrt, SharedPreferences sp, String time, String schedule) {
+        boolean isSending = scheduledSMSBox.count() > 0;
+        String[] recipients =  to.split(",");
+
+        ScheduledSMS scheduledSMS = new ScheduledSMS();
+        scheduledSMS.scheduledDate = schedule;
+        scheduledSMS.message = message;
+        scheduledSMS.time = time;
+        scheduledSMS.to = to;
+        scheduledSMS.secret = secret;
+
+        if(scheduledSMSBox == null) {
+            scheduledSMSBox = ObjectBox.get().boxFor(ScheduledSMS.class);
+        }
+
+        Log.e("PushService","current id: "+scheduledSMS.id);
+
+        long id = scheduledSMSBox.put(scheduledSMS);
+
+        return isSending;
     }
 
     private void saveToScheduledMessage(String to, String message, String secret, String scrt, SharedPreferences sp, String time, String schedule)  {

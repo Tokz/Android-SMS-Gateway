@@ -29,7 +29,6 @@ public class Fungsi {
     public static String SENT = "SMS_SENT";
     public static String DELIVERED = "SMS_DELIVERED";
 
-
     public static void sendSMS(final String number, String message, final Context cx){
 
         if (!TextUtils.isEmpty(number) && !TextUtils.isEmpty(message))
